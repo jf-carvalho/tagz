@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tagz Library Dev Environment</title>
+
+	<style type="text/css">
+		
+		body{
+			display: flex;
+			width: 100vw;
+			height: 100vh;
+			justify-content: center;
+			align-items: center;
+			background: radial-gradient(#EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
+			margin: 0;
+			flex-direction: column;
+		}
+
+		textarea{
+			width: 400px;
+		}
+
+		#result{
+			margin: 1rem 0;
+		}
+
+	</style>
+
+</head>
+<body>
+
+	<textarea rows="6" class="tagz"></textarea>
+
+	<div id="result"></div>
+
+	<script type="text/javascript">
+
+		window.onload = () => {
+			var style = document.createElement('style')
+			style.type = 'text/css'
+			style.innerHTML = `.tag{
+									color: #fff; 
+									background-color: #4e7596;
+									margin-right: 1.25px;
+									padding: 3px;
+									border-radius: 3px;
+								}`
+			document.getElementsByTagName('head')[0].appendChild(style);
+
+			const tagz_elements = document.getElementsByClassName('tagz')
+
+			Array.from(tagz_elements).forEach(tagz => {
+
+				const wrapper = document.createElement('div');
+				wrapper.style.height = window.getComputedStyle(tagz).getPropertyValue('height')
+				wrapper.style.width = window.getComputedStyle(tagz).getPropertyValue('width')
+				wrapper.style.border = '1px solid black'
+				wrapper.style.position = 'relative'
+				wrapper.style.display = 'flex'
+				wrapper.classList.add = 'tagz_wrapper'
+				tagz.parentElement.insertBefore(wrapper, tagz);
+				wrapper.appendChild(tagz)
+
+				const container = document.createElement('div')
+				container.style.cssText = 'position: absolute; top: 0; left: 0 display: flex; flex-wrap: wrap; width: 100%; margin: 6px 2px' 
+				container.classList.add("tagz_container")
+				wrapper.appendChild(tagz)
+				wrapper.appendChild(container)
+
+				tagz.addEventListener('keyup', key_typed, true)
+
+			})
+		}
+
+		function key_typed(evt){
+			if(isComma(evt)){
+				const tag = this.value.split(',').slice(0,this.value.split(',').length-1).pop()
+
+				const tag_span = document.createElement('span')
+				tag_span.innerText = tag
+				tag_span.style.fontSize = window.getComputedStyle(evt.target).getPropertyValue('font-size')
+				tag_span.style.letterSpacing = window.getComputedStyle(evt.target).getPropertyValue('letter-spacing')
+				tag_span.style.fontFamily = window.getComputedStyle(evt.target).getPropertyValue('font-family')
+				tag_span.classList.add('tag')
+
+				evt.target.parentElement.querySelector('.tagz_container').append(tag_span)
+			}else if(isBackspace(evt)){
+				const all_chars = Array.from(evt.target.value)
+				var word = [];
+				for (var i = (all_chars.length - 1) - (all_chars.length - 1 - evt.target.selectionStart) ; i >= 0; i--) {
+					word.push(all_chars[i])
+					if(all_chars[i] === ','){
+						break;
+					}
+				}
+
+				
+				word = word.reverse()
+
+				if(word[0] === ','){
+					var comma = word.shift();
+				}
+
+				word = word.join('');
+
+				if(evt.target.selectionStart !== evt.target.value.length){
+					word = word.slice(0,-1);
+				}
+
+				evt.target.value = evt.target.value.replace(word,'');
+
+				const tags = evt.target.parentElement.querySelectorAll('.tagz_container .tag');
+				for (var i = tags.length - 1; i >= 0; i--) {
+					if(tags[i].innerText === word){
+						tags[i].remove() 
+					}
+				}
+			}
+		}
+
+		function isComma(evt_key){
+			if (evt_key.key === ',' || evt_key.keyCode === 188) {
+				return true
+			}
+			return false			
+		}
+
+		function isBackspace(evt_key){
+			if (evt_key.key === 'Backspace' || evt_key.keyCode === 8) {
+				return true
+			}
+			return false
+		}
+
+	</script>
+
+</body>
+</html>
