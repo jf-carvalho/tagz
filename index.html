@@ -39,7 +39,7 @@
 
 				wrapper.addEventListener('click', focusInput, true)
 
-				wrapper.style.cssText = `	height: ${window.getComputedStyle(tagz).getPropertyValue('height')};
+				wrapper.style.cssText = `	min-height: ${window.getComputedStyle(tagz).getPropertyValue('height')};
 											width: ${window.getComputedStyle(tagz).getPropertyValue('width')};
 											border: ${window.getComputedStyle(tagz).getPropertyValue('border')};
 											font-size: ${window.getComputedStyle(tagz).getPropertyValue('font-size')};
@@ -74,7 +74,7 @@
 												 position: absolute`
 				wrapper.appendChild(text_for_sizing)
 
-				tagz.style.display = 'none'
+				// tagz.style.display = 'none'
 
 				tagz.parentElement.querySelector('input').addEventListener('keyup', key_typed, true)
 
@@ -92,16 +92,43 @@
 
 				const tag_span = document.createElement('span')
 				tag_span.innerText = tag
-				tag_span.style.cssText = `	color: #fff; 
-											background-color: #4e7596;
+				tag_span.classList.add('tagz_tag')
+
+				const color = evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-color') !== null ? evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-color') : '#fff'
+
+				const bg = evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-bg') !== null ? evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-bg') : '#007BFF'
+
+				tag_span.style.cssText = `	color: ${color}; 
+											background-color: ${bg};
 											margin-right: 3px;
 											margin-bottom: 3px;
-											padding: 1.5px 10px;
-											height: 20px;
+											padding: 1.5px 0 1.5px 10px;
+											height: ${window.getComputedStyle(evt.target.parentElement.querySelector('input')).getPropertyValue('height')};
 											display: flex;
 											justify-content: center;
 											align-items: center;
 											border-radius: 3px;`
+
+				const del_tag = document.createElement('a')
+				del_tag.innerHTML = '&times;'
+				del_tag.style.cssText = `
+										dispaly: block;
+										font-size: 16px;
+										color: #fff;
+										padding: 0 6px;
+										cursor: pointer;
+										`
+				del_tag.addEventListener('click', function(){
+					const clicked_tag = this.parentElement;
+					const all_tags = this.parentElement.parentElement.querySelectorAll('.tagz_tag')
+					for (var i = all_tags.length - 1; i >= 0; i--) {
+						if(all_tags[i] === clicked_tag){
+							
+						}
+					}
+					// this.parentElement.remove();
+				}, true)
+				tag_span.append(del_tag)
 
 				evt.target.parentElement.insertBefore(tag_span, evt.target.parentElement.querySelector('input'))
 				evt.target.value = ''
