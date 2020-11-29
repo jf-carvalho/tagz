@@ -3,118 +3,111 @@
 <head>
 	<title>Tagz Library Dev Environment</title>
 
-	<style type="text/css">
-		
-		body{
-			display: flex;
-			width: 100vw;
-			height: 100vh;
-			justify-content: center;
-			align-items: center;
-			background: radial-gradient(#EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
-			margin: 0;
-			flex-direction: column;
-		}
-
-		textarea{
-			width: 400px;
-		}
-
-		#result{
-			margin: 1rem 0;
-		}
-
-	</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" integrity="sha512-oc9+XSs1H243/FRN9Rw62Fn8EtxjEYWHXRvjS43YtueEewbS6ObfXcJNyohjHqVKFPoXXUxwc+q1K7Dee6vv9g==" crossorigin="anonymous" />
 
 </head>
 <body>
 
-	<textarea rows="6" class="tagz"></textarea>
-
-	<div id="result"></div>
+	<div class="container border">
+		<div class="row">
+			<div class="col-12">
+				<h1>Test</h1>
+			</div>
+			<div class="col-6 border">
+				<textarea rows="6" class="tagz form-control"></textarea>
+			</div>
+		</div>
+	</div>
 
 	<script type="text/javascript">
 
-		window.onload = () => {
-			var style = document.createElement('style')
-			style.type = 'text/css'
-			style.innerHTML = `.tag{
-									color: #fff; 
-									background-color: #4e7596;
-									margin-right: 1.25px;
-									padding: 3px;
-									border-radius: 3px;
-								}`
-			document.getElementsByTagName('head')[0].appendChild(style);
+		function focusInput(evt){
+			if(evt.target.classList.contains('tagz_wrapper')){
+				evt.target.querySelector('input').focus()
+				evt.target.style.outline = window.getComputedStyle(evt.target.querySelector('input')).getPropertyValue('outline')
+				evt.target.querySelector('input').style.outline = 'none'			
+			}
+		}
 
+		window.onload = () => {
 			const tagz_elements = document.getElementsByClassName('tagz')
 
 			Array.from(tagz_elements).forEach(tagz => {
 
 				const wrapper = document.createElement('div');
-				wrapper.style.height = window.getComputedStyle(tagz).getPropertyValue('height')
-				wrapper.style.width = window.getComputedStyle(tagz).getPropertyValue('width')
-				wrapper.style.border = '1px solid black'
-				wrapper.style.position = 'relative'
-				wrapper.style.display = 'flex'
-				wrapper.classList.add = 'tagz_wrapper'
+				wrapper.classList.add('tagz_wrapper')
+
+				wrapper.addEventListener('click', focusInput, true)
+
+				wrapper.style.cssText = `	height: ${window.getComputedStyle(tagz).getPropertyValue('height')};
+											width: ${window.getComputedStyle(tagz).getPropertyValue('width')};
+											border: ${window.getComputedStyle(tagz).getPropertyValue('border')};
+											font-size: ${window.getComputedStyle(tagz).getPropertyValue('font-size')};
+											font-family: ${window.getComputedStyle(tagz).getPropertyValue('font-family')};
+											border-radius: ${window.getComputedStyle(tagz).getPropertyValue('border-radius')};
+											background: ${window.getComputedStyle(tagz).getPropertyValue('background')};
+											padding: ${window.getComputedStyle(tagz).getPropertyValue('padding')};
+											display: flex;
+											flex-wrap: wrap;
+											align-items: flex-start;
+											align-content: baseline;
+											`
+				
 				tagz.parentElement.insertBefore(wrapper, tagz);
+
+				const input = document.createElement('input')
+				input.style.cssText = `	border: none;
+										background: none;
+										width: 20px;
+										`
+				input.addEventListener('focus', function(){
+					this.parentElement.style.outline = getComputedStyle(this).getPropertyValue('outline')
+					this.style.outline = 'none'
+				}, true)
+				wrapper.appendChild(input)
+
 				wrapper.appendChild(tagz)
 
-				const container = document.createElement('div')
-				container.style.cssText = 'position: absolute; top: 0; left: 0 display: flex; flex-wrap: wrap; width: 100%; margin: 6px 2px' 
-				container.classList.add("tagz_container")
-				wrapper.appendChild(tagz)
-				wrapper.appendChild(container)
+				const text_for_sizing = document.createElement('div')
+				text_for_sizing.classList.add('text_for_sizing')
+				text_for_sizing.style.cssText = `visibility: hidden; 
+												 position: absolute`
+				wrapper.appendChild(text_for_sizing)
 
-				tagz.addEventListener('keyup', key_typed, true)
+				tagz.style.display = 'none'
+
+				tagz.parentElement.querySelector('input').addEventListener('keyup', key_typed, true)
 
 			})
 		}
 
 		function key_typed(evt){
+
+				evt.target.parentElement.querySelector('.text_for_sizing').innerText = this.value
+				const width = parseInt(window.getComputedStyle(evt.target.parentElement.querySelector('.text_for_sizing')).getPropertyValue('width').replace('px','')) + 25;
+				this.style.width = width + 'px'
+
 			if(isComma(evt)){
 				const tag = this.value.split(',').slice(0,this.value.split(',').length-1).pop()
 
 				const tag_span = document.createElement('span')
 				tag_span.innerText = tag
-				tag_span.style.fontSize = window.getComputedStyle(evt.target).getPropertyValue('font-size')
-				tag_span.style.letterSpacing = window.getComputedStyle(evt.target).getPropertyValue('letter-spacing')
-				tag_span.style.fontFamily = window.getComputedStyle(evt.target).getPropertyValue('font-family')
-				tag_span.classList.add('tag')
+				tag_span.style.cssText = `	color: #fff; 
+											background-color: #4e7596;
+											margin-right: 3px;
+											margin-bottom: 3px;
+											padding: 1.5px 10px;
+											height: 20px;
+											display: flex;
+											justify-content: center;
+											align-items: center;
+											border-radius: 3px;`
 
-				evt.target.parentElement.querySelector('.tagz_container').append(tag_span)
+				evt.target.parentElement.insertBefore(tag_span, evt.target.parentElement.querySelector('input'))
+				evt.target.value = ''
+				evt.target.parentElement.querySelector('textarea').value += tag + ','
 			}else if(isBackspace(evt)){
-				const all_chars = Array.from(evt.target.value)
-				var word = [];
-				for (var i = (all_chars.length - 1) - (all_chars.length - 1 - evt.target.selectionStart) ; i >= 0; i--) {
-					word.push(all_chars[i])
-					if(all_chars[i] === ','){
-						break;
-					}
-				}
-
 				
-				word = word.reverse()
-
-				if(word[0] === ','){
-					var comma = word.shift();
-				}
-
-				word = word.join('');
-
-				if(evt.target.selectionStart !== evt.target.value.length){
-					word = word.slice(0,-1);
-				}
-
-				evt.target.value = evt.target.value.replace(word,'');
-
-				const tags = evt.target.parentElement.querySelectorAll('.tagz_container .tag');
-				for (var i = tags.length - 1; i >= 0; i--) {
-					if(tags[i].innerText === word){
-						tags[i].remove() 
-					}
-				}
 			}
 		}
 
