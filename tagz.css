@@ -1,0 +1,33 @@
+.tagz-wrapper {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: baseline; }
+
+.tagz-input {
+  border: none;
+  background: none;
+  width: 20px; }
+
+.text_for_sizing {
+  visibility: hidden;
+  position: absolute; }
+
+.tagz_tag {
+  margin-right: 3px;
+  margin-bottom: 3px;
+  padding: 1.5px 0 1.5px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px; }
+
+.del_tag {
+  display: block;
+  font-size: 16px;
+  color: #fff;
+  padding: 0 6px;
+  cursor: pointer; }
+
+/*# sourceMappingURL=tagz.css.map */

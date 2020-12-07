@@ -1,98 +1,111 @@
-function focusInput(evt){
-	if(evt.target.classList.contains('tagz_wrapper')){
-		evt.target.querySelector('input').focus()
-		evt.target.style.outline = window.getComputedStyle(evt.target.querySelector('input')).getPropertyValue('outline')
-		evt.target.querySelector('input').style.outline = 'none'			
+const create_element = (tag, classes, events) => {
+	const created_element = document.createElement(tag)
+
+	const _classes = typeof classes == 'string' ? [classes] : classes
+	_classes.forEach(class_name => {
+		created_element.classList.add(class_name)
+	})
+
+	if(events){
+	events.forEach(({type, callback}) => {
+		created_element.addEventListener(type, callback, true)
+	})
 	}
+
+	return created_element
 }
 
-window.onload = () => {
-	const tagz_elements = document.getElementsByClassName('tagz')
+Element.prototype.copy_style = function(copies, similars, ref){
+	copies.forEach(prop => {
+		this.style[prop] = window.getComputedStyle(ref).getPropertyValue(prop)
+	})
 
-	Array.from(tagz_elements).forEach(tagz => {
-
-		const wrapper = document.createElement('div');
-		wrapper.classList.add('tagz_wrapper')
-
-		wrapper.addEventListener('click', focusInput, true)
-
-		wrapper.style.cssText = `	min-height: ${window.getComputedStyle(tagz).getPropertyValue('height')};
-									width: 100%;
-									border: ${window.getComputedStyle(tagz).getPropertyValue('border')};
-									font-size: ${window.getComputedStyle(tagz).getPropertyValue('font-size')};
-									font-family: ${window.getComputedStyle(tagz).getPropertyValue('font-family')};
-									border-radius: ${window.getComputedStyle(tagz).getPropertyValue('border-radius')};
-									background: ${window.getComputedStyle(tagz).getPropertyValue('background')};
-									padding: ${window.getComputedStyle(tagz).getPropertyValue('padding')};
-									display: flex;
-									flex-wrap: wrap;
-									align-items: flex-start;
-									align-content: baseline;
-									`
-		
-		tagz.parentElement.insertBefore(wrapper, tagz);
-
-		const input = document.createElement('input')
-		input.classList.add('one_bs_to_edit')
-		input.style.cssText = `	border: none;
-								background: none;
-								width: 20px;
-								`
-		input.addEventListener('focus', function(){
-			this.parentElement.style.outline = getComputedStyle(this).getPropertyValue('outline')
-			this.style.outline = 'none'
-		}, true)
-		wrapper.appendChild(input)
-
-		wrapper.appendChild(tagz)
-
-		const text_for_sizing = document.createElement('div')
-		text_for_sizing.classList.add('text_for_sizing')
-		text_for_sizing.style.cssText = `visibility: hidden; 
-										 position: absolute`
-		wrapper.appendChild(text_for_sizing)
-
-		tagz.style.display = 'none'
-
-		tagz.parentElement.querySelector('input').addEventListener('keyup', key_typed, true)
-
-		if(tagz.value !== ''){
-			const values = tagz.value.split(',');
-			values.forEach(value => {
-				createTag(input, value)
-			})
-		}
-
+	similars.forEach(props => {		
+		this.style[Object.keys(props)[0]] = window.getComputedStyle(ref).getPropertyValue(Object.values(props)[0])
 	})
 }
 
-function key_typed(evt){
+Element.prototype.tagz = function(options){
 
-		evt.target.parentElement.querySelector('.text_for_sizing').innerText = this.value
-		const width = parseInt(window.getComputedStyle(evt.target.parentElement.querySelector('.text_for_sizing')).getPropertyValue('width').replace('px','')) + 25;
-		this.style.width = width + 'px'
-		
-		if(!isBackspace(evt)){
-			evt.target.classList.remove('one_bs_to_edit')
+	const wrapper = create_element(
+			'div', 
+			'tagz-wrapper', 
+			[
+				{
+					'type': 'click', 
+					'callback': focusWrapper
+				}
+			])
+
+	wrapper.copy_style(['border', 'font-size', 'font-family', 'border-radius', 'background', 'padding'], [{'min-height': 'height'}], this)
+
+	const input = create_element(
+			'input', 
+			['one_bs_to_edit', 'tagz-input'], 
+			[
+				{
+					'type': 'focus', 
+					'callback': focusInput
+				}
+			])
+
+	const text_for_sizing = create_element('div', 'text_for_sizing')
+
+	this.parentElement.insertBefore(wrapper, this)
+	wrapper.appendChild(input)
+	wrapper.appendChild(this)	
+	wrapper.appendChild(text_for_sizing)
+
+	this.style.display = 'none'
+
+	this.parentElement.querySelector('input').addEventListener('keyup', () => key_typed(options), true)
+
+	if(this.value !== ''){
+		let val = this.value
+		if(val.trim().slice(-1) === ','){
+			val = val.trim().slice(0, -1); 
+		}
+		const values = val.split(',');
+		values.forEach(value => {
+			createTag(input, value, options)
+		})
+	}
+}
+
+function focusInput(evt){
+	this.parentElement.style.outline = getComputedStyle(this).getPropertyValue('outline')
+	this.style.outline = 'none'
+	evt.stopPropagation()
+}
+
+function focusWrapper(){
+	this.querySelector('input').focus()
+	this.querySelector('input').style.outline = 'none'		
+}
+
+function key_typed(options){
+	
+	const input = event.target
+	input.parentElement.querySelector('.text_for_sizing').innerText = input.value
+
+	const width = parseInt(window.getComputedStyle(input.parentElement.querySelector('.text_for_sizing')).getPropertyValue('width').replace('px','')) + 25;
+	input.style.width = width + 'px'
+	
+	if(!isBackspace(event)){
+		input.classList.remove('one_bs_to_edit')
+	}
+
+	if(isComma(event)){
+		const tag = input.value.split(',').slice(0,input.value.split(',').length-1).pop()
+		createTag(input, tag, options);
+
+	}else if(isBackspace(event)){
+		if(input.classList.contains('one_bs_to_edit')){
+			editLastTag(input)
 		}
 
-	if(isComma(evt)){
-		const tag = this.value.split(',').slice(0,this.value.split(',').length-1).pop()
-
-		createTag(evt, tag);
-
-	}else if(isBackspace(evt)){
-		if(evt.target.classList.contains('one_bs_to_edit')){
-			const all_tags = this.parentElement.parentElement.querySelectorAll('.tagz_tag')
-			evt.target.style.width = window.getComputedStyle(all_tags[all_tags.length - 1]).getPropertyValue('width')
-			all_tags[all_tags.length - 1].querySelector('a').remove()
-			evt.target.value = all_tags[all_tags.length - 1].innerText
-			all_tags[all_tags.length - 1].remove()
-			evt.target.classList.remove('one_bs_to_edit')
-		}
-
-		if(evt.target.value == ''){
-			evt.target.classList.add('one_bs_to_edit')
+		if(input.value == ''){
+			input.classList.add('one_bs_to_edit')
 		}
 	}
 }
@@ -111,56 +124,61 @@ function isBackspace(evt_key){
 	return false
 }
 
-function createTag(evt, tag){
+function editLastTag(input, all_tags = input.parentElement.parentElement.querySelectorAll('.tagz_tag')){
+	const last_tag = all_tags[all_tags.length - 1]
 
-	if(evt instanceof HTMLElement){
-		evt.target = evt;
-	}
+	input.style.width = window.getComputedStyle(last_tag).getPropertyValue('width')
+	last_tag.querySelector('a').remove()
+	input.value = last_tag.innerText
+	last_tag.remove()
 
-	const tag_span = document.createElement('span')
+	input.classList.remove('one_bs_to_edit')
+}
+
+function setTagStyle(tag, input, options){
+	const {bg, color} = defaults(options)
+	tag.style.cssText = `
+						color: ${color}; 
+						background-color: ${bg};
+						height: ${window.getComputedStyle(input.parentElement.querySelector('input')).getPropertyValue('height')};
+						`
+}
+
+function createTag(input, tag, options){
+
+	const tag_span = create_element('span', 'tagz_tag')
 	tag_span.innerText = tag
-	tag_span.classList.add('tagz_tag')
 
-	const color = evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-color') !== null ? evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-color') : '#fff'
-
-	const bg = evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-bg') !== null ? evt.target.parentElement.querySelector('.tagz').getAttribute('tagz-bg') : '#007BFF'
-
-	tag_span.style.cssText = `	color: ${color}; 
-								background-color: ${bg};
-								margin-right: 3px;
-								margin-bottom: 3px;
-								padding: 1.5px 0 1.5px 10px;
-								height: ${window.getComputedStyle(evt.target.parentElement.querySelector('input')).getPropertyValue('height')};
-								display: flex;
-								justify-content: center;
-								align-items: center;
-								border-radius: 3px;`
-
-	const del_tag = document.createElement('a')
+	const del_tag = create_element('a', 'del_tag', [{'click': rm_tag}])
 	del_tag.innerHTML = '&times;'
-	del_tag.style.cssText = `
-							dispaly: block;
-							font-size: 16px;
-							color: #fff;
-							padding: 0 6px;
-							cursor: pointer;
-							`
-	del_tag.addEventListener('click', function(){
-		const clicked_tag = this.parentElement;
-		const all_tags = this.parentElement.parentElement.querySelectorAll('.tagz_tag')
-		for (var i = all_tags.length - 1; i >= 0; i--) {
-			if(all_tags[i] === clicked_tag){
-				const value_arr = this.parentElement.parentElement.querySelector('.tagz').value.split(',')
-				const rm_value = value_arr.splice(i,1)
-				this.parentElement.parentElement.querySelector('.tagz').value = value_arr.join(',')
-			}
-		}
-		this.parentElement.remove()
-	}, true)
+
 	tag_span.append(del_tag)
 
-	evt.target.parentElement.insertBefore(tag_span, evt.target.parentElement.querySelector('input'))
-	evt.target.value = ''
-	evt.target.classList.add('one_bs_to_edit')
-	evt.target.parentElement.querySelector('textarea').value += tag + ','
+	input.parentElement.insertBefore(tag_span, input.parentElement.querySelector('input'))
+	input.value = ''
+	input.classList.add('one_bs_to_edit')
+	input.parentElement.querySelector('textarea').value += tag + ','
+
+	setTagStyle(tag_span, input, options)
+}
+
+function rm_tag(){
+	const clicked_tag = this.parentElement;
+	const all_tags = this.parentElement.parentElement.querySelectorAll('.tagz_tag')
+	for (var i = all_tags.length - 1; i >= 0; i--) {
+		if(all_tags[i] === clicked_tag){
+			const value_arr = this.parentElement.parentElement.querySelector('.tagz').value.split(',')
+			const rm_value = value_arr.splice(i,1)
+			this.parentElement.parentElement.querySelector('.tagz').value = value_arr.join(',')
+		}
+	}
+	this.parentElement.remove()
+}
+
+function defaults(options){
+	const {bg, color} = options || {}
+	return {
+		'bg': bg || '#007BFF',
+		'color': color || '#fff'
+	}
 }
