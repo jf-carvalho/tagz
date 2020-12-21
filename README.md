@@ -1,6 +1,7 @@
 # tagz.js
 
 tagz.js is a very simple JS library to turn a standard text input or textarea into a fine and elegant tag editor.
+
 Latest version: 1.0.2
 
 
