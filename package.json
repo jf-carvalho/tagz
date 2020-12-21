@@ -1,0 +1,29 @@
+{
+  "name": "tagz.js",
+  "version": "1.0.0",
+  "description": "Very simple js lib to turn basic text inputs into tags editors",
+  "main": "tagz.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jf-carvalho/tagz.git"
+  },
+  "keywords": [
+    "tags",
+    "tags",
+    "editor",
+    "tags",
+    "input",
+    "js",
+    "vanilla",
+    "js"
+  ],
+  "author": "JF Carvalho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jf-carvalho/tagz/issues"
+  },
+  "homepage": "https://github.com/jf-carvalho/tagz#readme"
+}

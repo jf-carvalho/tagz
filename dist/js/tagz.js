@@ -37,7 +37,7 @@ Element.prototype.tagz = function(options){
 				}
 			])
 
-	wrapper.copy_style(['border', 'font-size', 'font-family', 'border-radius', 'background', 'padding'], [{'min-height': 'height'}], this)
+	wrapper.copy_style(['border', 'font-size', 'font-family', 'border-radius', 'background', 'padding', 'width', 'background'], [{'min-height': 'height'}], this)
 
 	const input = create_element(
 			'input', 
