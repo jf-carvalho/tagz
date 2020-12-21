@@ -13,7 +13,7 @@ There's nothing you need but the library itself and one simple line of code, suc
 
 ## Installation
 
-There are two methods of installation available. You can download the js and css files and attach to your project ou use npm:
+There are two methods of installation available. You can download the js and css files and attach to your project or use npm:
 
     npm i tagz.js
 or use unpkg CDN:
