@@ -37,5 +37,4 @@ or use unpkg CDN:
 
 ## Used technologies
 
-JS
-SaSS
+JS and SaSS :)
