@@ -15,14 +15,24 @@ const create_element = (tag, classes, events) => {
 	return created_element
 }
 
-Element.prototype.copy_style = function(copies, similars, ref){
-	copies.forEach(prop => {
-		this.style[prop] = window.getComputedStyle(ref).getPropertyValue(prop)
-	})
+Element.prototype.copy_style = function(copies, similars, ref, pseudo){
+	if(copies){
+		if(pseudo){
+			copies.forEach(prop => {
+				this.style[prop] = window.getComputedStyle(ref, `:${pseudo}`).getPropertyValue(prop)
+			})
+		}else{
+			copies.forEach(prop => {
+				this.style[prop] = window.getComputedStyle(ref).getPropertyValue(prop)
+			})
+		}
+	}
 
-	similars.forEach(props => {		
-		this.style[Object.keys(props)[0]] = window.getComputedStyle(ref).getPropertyValue(Object.values(props)[0])
-	})
+	if(similars){
+		similars.forEach(props => {		
+			this.style[Object.keys(props)[0]] = window.getComputedStyle(ref).getPropertyValue(Object.values(props)[0])
+		})
+	}
 }
 
 Element.prototype.tagz = function(options){
@@ -49,6 +59,14 @@ Element.prototype.tagz = function(options){
 				}
 			])
 
+	if(this.placeholder){
+		const fake_placeholder = create_element('span', 'fake_placeholder')
+		fake_placeholder.innerText = this.placeholder
+		fake_placeholder.copy_style(['color', 'opacity', 'font-size'], null, this, 'placeholder')
+		fake_placeholder.classList.add('fake_placeholder')
+		wrapper.appendChild(fake_placeholder)
+	}
+
 	const text_for_sizing = create_element('div', 'text_for_sizing')
 
 	this.parentElement.insertBefore(wrapper, this)
@@ -56,6 +74,7 @@ Element.prototype.tagz = function(options){
 	wrapper.appendChild(this)	
 	wrapper.appendChild(text_for_sizing)
 
+	this.classList.add('tagz')
 	this.style.display = 'none'
 
 	this.parentElement.querySelector('input').addEventListener('keyup', () => key_typed(options), true)
@@ -75,12 +94,14 @@ Element.prototype.tagz = function(options){
 function focusInput(evt){
 	this.parentElement.style.outline = getComputedStyle(this).getPropertyValue('outline')
 	this.style.outline = 'none'
+	this.parentElement.querySelector('.fake_placeholder').style.display = 'none'
 	evt.stopPropagation()
 }
 
 function focusWrapper(){
 	this.querySelector('input').focus()
-	this.querySelector('input').style.outline = 'none'		
+	this.querySelector('input').style.outline = 'none'	
+	this.querySelector('.fake_placeholder').style.display = 'none'	
 }
 
 function key_typed(options){
@@ -149,7 +170,15 @@ function createTag(input, tag, options){
 	const tag_span = create_element('span', 'tagz_tag')
 	tag_span.innerText = tag
 
-	const del_tag = create_element('a', 'del_tag', [{'click': rm_tag}])
+	const del_tag = create_element(
+			'a', 
+			'del_tag', 
+			[
+				{
+					'type': 'click', 
+					'callback': rm_tag
+				}
+			])
 	del_tag.innerHTML = '&times;'
 
 	tag_span.append(del_tag)
