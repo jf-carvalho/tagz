@@ -1,6 +1,6 @@
 {
   "name": "tagz.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Very simple js lib to turn basic text inputs into tags editors",
   "main": "tagz.js",
   "scripts": {
